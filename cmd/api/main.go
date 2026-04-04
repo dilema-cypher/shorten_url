@@ -20,7 +20,7 @@ func main() {
 	
 	defer db.CloseSession(session)
 
-	r := router.SetupRouter()
+	r := router.SetupRouter(cfg)
 
 	slog.Info("Server started on :8080")
 	
