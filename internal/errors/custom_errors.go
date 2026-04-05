@@ -7,6 +7,7 @@ var (
 	ErrInvalidURLType = errors.New("invalid url: url must be a valid string")
 	ErrDatabaseError  = errors.New("database error")
 	ErrRedisError     = errors.New("redis error")
+	ErrURLLong        = errors.New("url is too long")
 )
 
 type InvalidURLError struct {
@@ -33,6 +34,14 @@ func (e DatabaseError) Unwrap() error {
 type RedisError struct {
 	Message string
 	Err     error
+}
+
+type URLLong struct {
+	Message string
+}
+
+func (e URLLong) Error() string {
+	return e.Message
 }
 
 func (e RedisError) Error() string {

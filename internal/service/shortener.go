@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"net/url"
 	"strings"
 
 	"github.com/dilema-cypher/shorten_url/internal/errors"
@@ -31,10 +30,15 @@ func NewShortenerService(redisClient *redis.RedisClient, session *gocql.Session,
 }
 
 func (s *shortenerService) Shorten(ctx context.Context, urlStr string) (string, error) {
+	if len(urlStr) > 4096 {
+		return "", errors.URLLong{Message: "url is too long"}
+	}
+
 	if strings.TrimSpace(urlStr) == "" {
 		return "", errors.InvalidURLError{Message: "url is required"}
 	}
-	if _, err := url.ParseRequestURI(urlStr); err != nil {
+
+	if err := utils.ValidateURL(urlStr); err != nil {
 		return "", errors.InvalidURLError{Message: "invalid url format"}
 	}
 

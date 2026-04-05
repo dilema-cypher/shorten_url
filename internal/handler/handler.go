@@ -21,15 +21,16 @@ func (h *Handler) Shorten(w http.ResponseWriter, r *http.Request) {
 	var req models.URL
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.SetErrorOnResponse(w, "invalid request body")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"error": "invalid request body"})
 		return
 	}
 
+
 	shortURL, err := h.service.Shorten(r.Context(), req.URL)
 	if err != nil {
+		utils.SetErrorOnResponse(w, err.Error())
 		w.WriteHeader(utils.StatusCodeByError(err))
-		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 		return
 	}
 
@@ -41,15 +42,15 @@ func (h *Handler) Shorten(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) RedirectByUrl(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if id == "" {
+		utils.SetErrorOnResponse(w, "id is required")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"error": "id is required"})
 		return
 	}
 
 	url, err := h.service.Get(r.Context(), id)
 	if err != nil {
+		utils.SetErrorOnResponse(w, err.Error())
 		w.WriteHeader(utils.StatusCodeByError(err))
-		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 		return
 	}
 

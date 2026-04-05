@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/dilema-cypher/shorten_url/internal/logger"
 	"github.com/dilema-cypher/shorten_url/internal/router"
 	"github.com/dilema-cypher/shorten_url/internal/redis"
 	"github.com/dilema-cypher/shorten_url/pkg/config"
@@ -12,6 +13,8 @@ import (
 
 func main() {
 	cfg := config.LoadEnv()
+
+	logger.Configure()
 
 	session, err := db.ConnCassandra(cfg)
 	if err != nil {
