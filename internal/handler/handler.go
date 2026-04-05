@@ -6,6 +6,7 @@ import (
 
 	"github.com/dilema-cypher/shorten_url/internal/models"
 	"github.com/dilema-cypher/shorten_url/internal/service"
+	"github.com/dilema-cypher/shorten_url/internal/utils"
 )
 
 type Handler struct {
@@ -25,9 +26,9 @@ func (h *Handler) Shorten(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shortURL, err := h.service.Shorten(req.URL)
+	shortURL, err := h.service.Shorten(r.Context(), req.URL)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(utils.StatusCodeByError(err))
 		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 		return
 	}

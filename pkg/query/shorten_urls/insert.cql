@@ -1,0 +1,1 @@
+INSERT INTO %%KEYSPACE%%.shorten_urls (id, url, created_at) VALUES (?, ?, ?);

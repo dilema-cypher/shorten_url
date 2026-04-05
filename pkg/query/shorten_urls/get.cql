@@ -1,0 +1,1 @@
+SELECT id, url, created_at FROM %%KEYSPACE%%.shorten_urls WHERE id = ?;

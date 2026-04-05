@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/dilema-cypher/shorten_url/internal/router"
+	"github.com/dilema-cypher/shorten_url/internal/redis"
 	"github.com/dilema-cypher/shorten_url/pkg/config"
 	"github.com/dilema-cypher/shorten_url/pkg/db"
 )
@@ -17,15 +18,31 @@ func main() {
 		slog.Error("Failed to connect to Cassandra:", "error", err)
 		return
 	}
-	
 	defer db.CloseSession(session)
 
-	r := router.SetupRouter(cfg)
+	redisConfig := redis.RedisConfig{
+		Host:         cfg.RedisHost,
+		DB:           cfg.RedisDB,
+		PoolSize:     cfg.RedisPoolSize,
+		MinIdleConns: cfg.RedisMinIdleConns,
+		ReadTimeout:  cfg.RedisReadTimeout,
+		WriteTimeout: cfg.RedisWriteTimeout,
+		DialTimeout:  cfg.RedisDialTimeout,
+	}
+
+	redisClient, err := redis.NewRedisClient(redisConfig)
+	if err != nil {
+		slog.Error("Failed to connect to Redis:", "error", err)
+		return
+	}
+	defer redisClient.Close()
+
+	r := router.SetupRouter(cfg, redisClient, session)
 
 	slog.Info("Server started on :8080")
-	
+
 	if err := http.ListenAndServe(":8080", r); err != nil {
 		slog.Error("Failed to start server:", "error", err)
 	}
-	
+
 }
