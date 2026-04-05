@@ -1,0 +1,1 @@
+SELECT url FROM %%KEYSPACE%%.shorten_urls WHERE id = ?;

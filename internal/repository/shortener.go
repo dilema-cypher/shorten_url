@@ -13,6 +13,7 @@ import (
 type ShortenerRepository interface {
 	IncrRedis(ctx context.Context, key string) (int64, error)
 	CreateShortenURL(ctx context.Context, id string, url string) error
+	GetURL(ctx context.Context, id string) (string, error)
 }
 
 type shortenerRepository struct {
@@ -47,4 +48,16 @@ func (s *shortenerRepository) CreateShortenURL(ctx context.Context, id string, u
 	}
 
 	return nil
+}
+
+func (s *shortenerRepository) GetURL(ctx context.Context, id string) (string, error) {
+	slog.Info("GetURL executing", "query", s.queries.GetURLByID, "id", id)
+
+	var url string
+	err := s.session.Query(s.queries.GetURLByID).Bind(id).Scan(&url)
+	if err != nil {
+		slog.Error("GetURL error", "error", err, "query", s.queries.GetURLByID)
+		return "", err
+	}
+	return url, nil
 }

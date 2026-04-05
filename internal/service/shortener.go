@@ -17,6 +17,7 @@ import (
 
 type ShortenerService interface {
 	Shorten(ctx context.Context, url string) (string, error)
+	Get(ctx context.Context, id string) (string, error)
 }
 
 type shortenerService struct {
@@ -55,4 +56,18 @@ func (s *shortenerService) Shorten(ctx context.Context, urlStr string) (string, 
 	shortURL := fmt.Sprintf("%s/%s", "http://localhost:8080/api/v1/", idBase62)
 
 	return shortURL, nil
+}
+
+func (s *shortenerService) Get(ctx context.Context, id string) (string, error) {
+	if strings.TrimSpace(id) == "" {
+		return "", errors.InvalidURLError{Message: "id is required"}
+	}
+
+	url, err := s.repo.GetURL(ctx, id)
+	if err != nil {
+		slog.Error("Error getting URL from Cassandra", "error", err)
+		return "", errors.DatabaseError{Message: "failed to get URL", Err: err}
+	}
+
+	return url, nil
 }

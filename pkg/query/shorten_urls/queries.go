@@ -11,8 +11,9 @@ import (
 var cqlFiles embed.FS
 
 type Queries struct {
-	Insert string
-	Get    string
+	Insert       string
+	Get          string
+	GetURLByID   string
 }
 
 func LoadQueries(cfg config.Config) Queries {
@@ -26,6 +27,10 @@ func LoadQueries(cfg config.Config) Queries {
 
 	if data, err := cqlFiles.ReadFile("get.cql"); err == nil {
 		queries.Get = strings.ReplaceAll(string(data), "%%KEYSPACE%%", keyspace)
+	}
+
+	if data, err := cqlFiles.ReadFile("get_url_by_id.cql"); err == nil {
+		queries.GetURLByID = strings.ReplaceAll(string(data), "%%KEYSPACE%%", keyspace)
 	}
 
 	return queries

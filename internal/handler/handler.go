@@ -37,3 +37,21 @@ func (h *Handler) Shorten(w http.ResponseWriter, r *http.Request) {
 		"short_url": shortURL,
 	})
 }
+
+func (h *Handler) RedirectByUrl(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	if id == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "id is required"})
+		return
+	}
+
+	url, err := h.service.Get(r.Context(), id)
+	if err != nil {
+		w.WriteHeader(utils.StatusCodeByError(err))
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	http.Redirect(w,r,url,http.StatusMovedPermanently)
+}
