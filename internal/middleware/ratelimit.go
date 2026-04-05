@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"encoding/json"
 	"net/http"
 	"sync"
 	"time"
@@ -21,8 +22,33 @@ func NewRateLimiter(limit int, window time.Duration) *RateLimiter {
 	}
 }
 
+func (rl *RateLimiter) cleanup() {
+	ticker := time.NewTicker(rl.window)
+	for range ticker.C {
+		rl.mu.Lock()
+		now := time.Now()
+		windowStart := now.Add(-rl.window)
+		for ip, times := range rl.requests {
+			var valid []time.Time
+			for _, t := range times {
+				if t.After(windowStart) {
+					valid = append(valid, t)
+				}
+			}
+			if len(valid) == 0 {
+				delete(rl.requests, ip)
+			} else {
+				rl.requests[ip] = valid
+			}
+		}
+		rl.mu.Unlock()
+	}
+}
+
 func NewRateLimiterFromConfig(requests int, windowSeconds int) *RateLimiter {
-	return NewRateLimiter(requests, time.Duration(windowSeconds)*time.Second)
+	rl := NewRateLimiter(requests, time.Duration(windowSeconds)*time.Second)
+	go rl.cleanup()
+	return rl
 }
 
 func (rl *RateLimiter) isAllowed(ip string) bool {
@@ -54,7 +80,9 @@ func RateLimitMiddleware(limiter *RateLimiter) func(http.Handler) http.Handler {
 			ip := r.RemoteAddr
 			if !limiter.isAllowed(ip) {
 				w.WriteHeader(http.StatusTooManyRequests)
-				w.Write([]byte("Too Many Requests"))
+				json.NewEncoder(w).Encode(map[string]string{
+					"error": "Too Many Requests",
+				})
 				return
 			}
 			next.ServeHTTP(w, r)

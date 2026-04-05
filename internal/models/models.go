@@ -7,7 +7,3 @@ type URL struct {
 type ShortenURL struct {
 	ShortURL string `json:"short_url"`
 }
-
-type ErrorOnRoute struct {
-	Error string
-}

@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/dilema-cypher/shorten_url/internal/models"
 	"github.com/dilema-cypher/shorten_url/internal/service"
@@ -41,8 +42,14 @@ func (h *Handler) Shorten(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) RedirectByUrl(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	if id == "" {
+	if strings.TrimSpace(id) == "" {
 		utils.SetErrorOnResponse(w, "id is required")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if len(id) > 11 {
+		utils.SetErrorOnResponse(w, "id is too long")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -55,4 +62,11 @@ func (h *Handler) RedirectByUrl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w,r,url,http.StatusMovedPermanently)
+}
+
+func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "OK",
+	})
 }

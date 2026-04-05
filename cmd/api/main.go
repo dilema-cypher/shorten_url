@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -42,9 +43,10 @@ func main() {
 
 	r := router.SetupRouter(cfg, redisClient, session)
 
-	slog.Info("Server started on :8080")
+	addr := fmt.Sprintf(":%s", cfg.ServerPort)
+	slog.Info("Server started", "port", addr)
 
-	if err := http.ListenAndServe(":8080", r); err != nil {
+	if err := http.ListenAndServe(addr, r); err != nil {
 		slog.Error("Failed to start server:", "error", err)
 	}
 

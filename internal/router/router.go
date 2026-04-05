@@ -1,7 +1,6 @@
 package router
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/dilema-cypher/shorten_url/internal/handler"
@@ -17,24 +16,19 @@ func SetupRouter(cfg config.Config, redisClient *redis.RedisClient, session *goc
 	mux := http.NewServeMux()
 
 	queries := shorten_urls.LoadQueries(cfg)
-	svc := service.NewShortenerService(redisClient, session, queries, cfg.RedisSaltKey)
+	svc := service.NewShortenerService(redisClient, session, queries, cfg.RedisSaltKey, cfg.URLApiRedirect)
 	h := handler.NewHandler(svc)
 
 	limiter := middleware.NewRateLimiterFromConfig(cfg.RateLimitRequests, cfg.RateLimitWindow)
 
 	mux.HandleFunc("POST /api/v1/shorten", h.Shorten)
-	mux.HandleFunc("GET /api/v1/{id}", h.RedirectByUrl)
-	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]string{
-			"status": "OK",
-		})
-	})
+	mux.HandleFunc("GET /{id}", h.RedirectByUrl)
+	mux.HandleFunc("GET /health", h.Health)
 
 	mw := middleware.RecoveryMiddleware(mux)
 	mw = middleware.LoggingMiddleware(mw)
 	mw = middleware.RateLimitMiddleware(limiter)(mw)
-	mw = middleware.JSONAplicationMiddleware(mw)
+	mw = middleware.JSONApplicationMiddleware(mw)
 
 	return mw
 }

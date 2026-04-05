@@ -20,13 +20,14 @@ type ShortenerService interface {
 }
 
 type shortenerService struct {
-	repo    repository.ShortenerRepository
-	saltKey string
+	repo           repository.ShortenerRepository
+	saltKey        string
+	urlApiRedirect string
 }
 
-func NewShortenerService(redisClient *redis.RedisClient, session *gocql.Session, queries shorten_urls.Queries, saltKey string) ShortenerService {
+func NewShortenerService(redisClient *redis.RedisClient, session *gocql.Session, queries shorten_urls.Queries, saltKey string, urlApiRedirect string) ShortenerService {
 	repo := repository.NewShortenerRepository(redisClient, session, queries)
-	return &shortenerService{repo: repo, saltKey: saltKey}
+	return &shortenerService{repo: repo, saltKey: saltKey, urlApiRedirect: urlApiRedirect}
 }
 
 func (s *shortenerService) Shorten(ctx context.Context, urlStr string) (string, error) {
@@ -57,7 +58,7 @@ func (s *shortenerService) Shorten(ctx context.Context, urlStr string) (string, 
 		return "", errors.DatabaseError{Message: "failed to save URL", Err: err}
 	}
 
-	shortURL := fmt.Sprintf("%s/%s", "http://localhost:8080/api/v1/", idBase62)
+	shortURL := fmt.Sprintf("%s%s", s.urlApiRedirect, idBase62)
 
 	return shortURL, nil
 }
