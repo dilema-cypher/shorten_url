@@ -62,17 +62,19 @@ func GetEnvDuration(key string, defaultValue time.Duration) time.Duration {
 }
 
 func LoadEnv() Config {
-	if err := godotenv.Load(); err != nil {
+
+	if err := godotenv.Load(".env"); err != nil {
 		slog.Error("Error loading .env file")
 	}
+
 	return Config{
-		CassandraHost:      GetEnv("CASSANDRA_HOST", "localhost:9042"),
-		CassandraUser:      GetEnv("CASSANDRA_USER", "cassandra"),
+		CassandraHost:      GetEnv("CASSANDRA_HOST", ""),
+		CassandraUser:      GetEnv("CASSANDRA_USER", ""),
 		CassandraPass:      GetEnv("CASSANDRA_PASSWORD", ""),
-		CassandraKeyspace:  GetEnv("CASSANDRA_KEYSPACE", "cassandra"),
+		CassandraKeyspace:  GetEnv("CASSANDRA_KEYSPACE", ""),
 		RateLimitRequests:  GetEnvInt("RATE_LIMIT_REQUESTS", 60),
 		RateLimitWindow:    GetEnvInt("RATE_LIMIT_WINDOW_SECONDS", 60),
-		RedisHost:          GetEnv("REDIS_HOST", "localhost:6379"),
+		RedisHost:          GetEnv("REDIS_HOST", ""),
 		RedisDB:            GetEnvInt("REDIS_DB", 1),
 		RedisSaltKey:       GetEnv("REDIS_SALT_KEY", "salt_shorten_url"),
 		RedisPoolSize:      GetEnvInt("REDIS_POOL_SIZE", 10),

@@ -1,0 +1,26 @@
+# Controle de versão
+.git/
+.gitignore
+
+# Arquivos de ambiente (MUITO IMPORTANTE PARA SEGURANÇA)
+.env
+*.env
+
+# Binários locais (evita copiar um executável compilado na sua máquina)
+main
+*.exe
+*.test
+
+# Dependências locais (o Dockerfile já vai baixar isso com go mod download)
+vendor/
+
+# Arquivos de log 
+*.log
+
+# IDEs e configurações do editor
+.vscode/
+.idea/
+
+# Arquivos do próprio Docker (eles não precisam existir dentro da imagem final)
+Dockerfile
+docker-compose.yml

@@ -1,7 +1,6 @@
 package db
 
 import (
-	"errors"
 	"log/slog"
 	"time"
 
@@ -10,9 +9,6 @@ import (
 )
 
 func ConnCassandra(cfg config.Config) (*gocql.Session, error) {
-	if cfg.CassandraUser == ""|| cfg.CassandraPass == "" {
-		return nil, errors.New("cassandra user or password is not set")
-	}
 
 	cluster := gocql.NewCluster(cfg.CassandraHost)
 	cluster.Keyspace = cfg.CassandraKeyspace
