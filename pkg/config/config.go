@@ -26,6 +26,7 @@ type Config struct {
 	RedisDialTimeout  time.Duration
 	URLApiRedirect    string
 	ServerPort        string
+	UrlAuth           string
 }
 
 func GetEnv(key string, defaultValue string) string {
@@ -81,5 +82,6 @@ func LoadEnv() Config {
 		RedisDialTimeout:   GetEnvDuration("REDIS_DIAL_TIMEOUT", 5*time.Second),
 		URLApiRedirect:     GetEnv("URL_API_REDIRECT", "http://localhost:8080"),
 		ServerPort:         GetEnv("SERVER_PORT", "8080"),
+		UrlAuth:            GetEnv("URL_AUTH", ""),
 	}
 }

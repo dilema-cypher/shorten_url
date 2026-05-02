@@ -21,6 +21,8 @@ func SetupRouter(cfg config.Config, redisClient *redis.RedisClient, session *goc
 
 	limiter := middleware.NewRateLimiterFromConfig(cfg.RateLimitRequests, cfg.RateLimitWindow)
 
+	middleware.InitAuthMiddleware(cfg.UrlAuth)
+
 	mux.HandleFunc("POST /api/v1/shorten", h.Shorten)
 	mux.HandleFunc("GET /{id}", h.RedirectByUrl)
 	mux.HandleFunc("GET /health", h.Health)
@@ -29,6 +31,7 @@ func SetupRouter(cfg config.Config, redisClient *redis.RedisClient, session *goc
 	mw = middleware.LoggingMiddleware(mw)
 	mw = middleware.RateLimitMiddleware(limiter)(mw)
 	mw = middleware.JSONApplicationMiddleware(mw)
+	mw = middleware.AuthMiddleware(mw)
 
 	return mw
 }
